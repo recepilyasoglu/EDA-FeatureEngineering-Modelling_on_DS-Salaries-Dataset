@@ -1,4 +1,3 @@
-# EDAonDS_Salaries-Dataset
 ## EDA and Feature Engineering on Data Science Job Salaries
 
 ## About Dataset
