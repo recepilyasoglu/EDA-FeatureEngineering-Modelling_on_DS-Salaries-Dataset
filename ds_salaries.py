@@ -1,9 +1,15 @@
 import pandas as pd
 import numpy as np
+import matplotlib
+matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder, StandardScaler, RobustScaler
-
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import r2_score
+from lightgbm import LGBMClassifier
 
 pd.set_option("display.width", 500)
 pd.set_option("display.max_columns", 500)
@@ -94,6 +100,7 @@ replace_with_thresholds(df, "salary")
 
 # Editing abbreviated names
 df["employment_type"].value_counts()
+df["experience_level"].value_counts()
 
 def convert_cat(dataframe, col1, col2, col3):
     mapping1 = {"EN": "Entry-level", "MI": "Mid-level", "SE": "Senior", "EX": "Executive-level"}
@@ -108,7 +115,7 @@ def convert_cat(dataframe, col1, col2, col3):
 
 
 convert_cat(df, "experience_level", "employment_type", "company_size")
-
+df
 # Creating new features
 
 # Salary
@@ -145,20 +152,19 @@ df.dtypes
 objects2 = [col for col in df.columns if df[col].dtype == "O"]
 df[objects2] = df[objects2].astype("category")
 
-cat_cols = [col for col in df.columns if df[col].dtype not in ["int64", "float64"]]
-# I'm removing the job title variable from cat_cols because there are too many values in it
-cat_cols = [x for x in cat_cols if x != "job_title"]
+ohe_cols = [col for col in df.columns if 10 >= df[col].nunique() > 2]
+ohe_cols = [x for x in ohe_cols if x != "work_year"]
 
 def one_hot_encoder(dataframe, categorical_cols, drop_first=True):
     dataframe = pd.get_dummies(dataframe, columns=categorical_cols, drop_first=drop_first)
     return dataframe
 
-new_df = one_hot_encoder(df, cat_cols)
+new_df = one_hot_encoder(df, ohe_cols)
 new_df.head()
-
 new_df.dtypes
 
-num_cols = [col for col in new_df.columns if new_df[col].dtypes not in ["category", "object"]]
+num_cols = [col for col in new_df.columns if new_df[col].dtypes != "category"]
+
 
 # standartlaştırma
 scaler = StandardScaler()
@@ -166,3 +172,33 @@ new_df[num_cols] = scaler.fit_transform(new_df[num_cols])
 
 new_df[num_cols].head()
 
+
+# Modelling
+
+y = new_df["salary"]  # bağımlı değişken
+X = new_df.drop(["salary", "work_year", "salary_currency", "job_title", "employee_residence", "company_location"], axis=1)  # bağımsız değişkenler, ilgili sütunlar dışındaki değerler
+X.head()
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
+
+rf_model = RandomForestRegressor().fit(X_train, y_train)
+y_pred = rf_model.predict(X_test)  # modeli test seti üzerinde tahmin et,
+
+r2 = r2_score(y_test, y_pred)
+print("R^2 Score:", r2)
+
+
+# Feature Importance
+def plot_importance(model, features, num=len(X), save=False):
+    feature_imp = pd.DataFrame({'Value': model.feature_importances_, 'Feature': features.columns})
+    plt.figure(figsize=(10, 10))
+    sns.set(font_scale=1)
+    sns.barplot(x="Value", y="Feature", data=feature_imp.sort_values(by="Value",
+                                                                      ascending=False)[0:num])
+    plt.title('Features')
+    plt.tight_layout()
+    plt.show()
+    if save:
+        plt.savefig('importances.png')
+
+plot_importance(rf_model, X_train)
