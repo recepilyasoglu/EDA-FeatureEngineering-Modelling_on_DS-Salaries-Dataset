@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.preprocessing import MinMaxScaler, LabelEncoder, StandardScaler, RobustScaler
+
 
 pd.set_option("display.width", 500)
 pd.set_option("display.max_columns", 500)
@@ -107,7 +109,6 @@ def convert_cat(dataframe, col1, col2, col3):
 
 convert_cat(df, "experience_level", "employment_type", "company_size")
 
-
 # Creating new features
 
 # Salary
@@ -135,3 +136,33 @@ df["Remote_Category"] = df["remote_ratio"].apply(lambda x: cat_remote_ratio(x))
 df[["remote_ratio", "Remote_Category"]].head(25)
 
 df.head()
+df.dtypes
+
+
+# Encoding
+
+#OHE
+objects2 = [col for col in df.columns if df[col].dtype == "O"]
+df[objects2] = df[objects2].astype("category")
+
+cat_cols = [col for col in df.columns if df[col].dtype not in ["int64", "float64"]]
+# I'm removing the job title variable from cat_cols because there are too many values in it
+cat_cols = [x for x in cat_cols if x != "job_title"]
+
+def one_hot_encoder(dataframe, categorical_cols, drop_first=True):
+    dataframe = pd.get_dummies(dataframe, columns=categorical_cols, drop_first=drop_first)
+    return dataframe
+
+new_df = one_hot_encoder(df, cat_cols)
+new_df.head()
+
+new_df.dtypes
+
+num_cols = [col for col in new_df.columns if new_df[col].dtypes not in ["category", "object"]]
+
+# standartlaştırma
+scaler = StandardScaler()
+new_df[num_cols] = scaler.fit_transform(new_df[num_cols])
+
+new_df[num_cols].head()
+
