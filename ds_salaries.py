@@ -185,7 +185,7 @@ rf_model = RandomForestRegressor().fit(X_train, y_train)
 y_pred = rf_model.predict(X_test)  # modeli test seti üzerinde tahmin et,
 
 r2 = r2_score(y_test, y_pred)
-print("R^2 Score:", r2)
+print("R^2 Score:", r2)  # 0.8265341422614365
 
 
 # Feature Importance
