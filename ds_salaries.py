@@ -116,6 +116,7 @@ def convert_cat(dataframe, col1, col2, col3):
 
 convert_cat(df, "experience_level", "employment_type", "company_size")
 df
+
 # Creating new features
 
 # Salary
