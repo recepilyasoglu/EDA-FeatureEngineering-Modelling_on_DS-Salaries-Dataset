@@ -3,7 +3,7 @@
 ## About Dataset
 
 ### Content
-<b> Column: </b> Description <br><br>
+<b> Columns </b>
 <b> work_year:</b>	The year the salary was paid.<br><br>
 <b> experience_level:</b> The experience level in the job during the year with the following possible values: EN Entry-level / Junior MI Mid-level / Intermediate SE Senior-level / Expert EX Executive-level / Director <br><br>
 <b> employment_type:</b> The type of employement for the role: PT Part-time FT Full-time CT Contract FL Freelance <br><br>
