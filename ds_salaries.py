@@ -50,6 +50,10 @@ df.groupby("employee_residence")["salary"].mean().sort_values(ascending=False)
 
 
 # Outliers
+
+num_cols = [col for col in df.columns if df[col].dtype in ["int64", "float64"]]
+num_cols = num_cols.remove("work_year")
+
 def outlier_thresholds(dataframe, col_name, q1=0.05, q3=0.95):
     quartile1 = dataframe[col_name].quantile(q1)
     quartile3 = dataframe[col_name].quantile(q3)
@@ -59,7 +63,7 @@ def outlier_thresholds(dataframe, col_name, q1=0.05, q3=0.95):
     return low_limit, up_limit
 
 
-outlier_thresholds(df, "salary")
+outlier_thresholds(df, num_cols)
 
 
 def check_outlier(dataframe, col_name):
@@ -69,8 +73,8 @@ def check_outlier(dataframe, col_name):
     else:
         return False
 
-
-check_outlier(df, "salary")
+for col in num_cols:
+    print(col, check_outlier(df, num_cols))
 
 
 # Feature Engineering
@@ -94,8 +98,8 @@ def replace_with_thresholds(dataframe, variable):
     dataframe.loc[(dataframe[variable] < low_limit), variable] = low_limit
     dataframe.loc[(dataframe[variable] > up_limit), variable] = up_limit
 
-
-replace_with_thresholds(df, "salary")
+for col in num_cols:
+    replace_with_thresholds(df, col)
 
 
 # Editing abbreviated names
@@ -165,7 +169,7 @@ new_df.head()
 new_df.dtypes
 
 num_cols = [col for col in new_df.columns if new_df[col].dtypes != "category"]
-
+num_cols = [col for col in num_cols if col != "work_year"]
 
 # standartlaştırma
 scaler = StandardScaler()
