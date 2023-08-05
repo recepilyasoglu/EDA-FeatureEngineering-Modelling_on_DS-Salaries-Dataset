@@ -5,7 +5,6 @@ matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder, StandardScaler, RobustScaler
-from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -191,11 +190,12 @@ X.head()
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=42)
 
+# Random Forest
 rf_model = RandomForestRegressor().fit(X_train, y_train)
 rf_y_pred = rf_model.predict(X_test)  # modeli test seti üzerinde tahmin et,
 
 
-# Lineer Regresyon
+# Linear Regression
 lr_model = LinearRegression()
 lr_model.fit(X_train, y_train)
 
