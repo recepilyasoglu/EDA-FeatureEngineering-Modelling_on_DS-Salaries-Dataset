@@ -8,8 +8,9 @@ from sklearn.preprocessing import MinMaxScaler, LabelEncoder, StandardScaler, Ro
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import r2_score
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from lightgbm import LGBMClassifier
+from sklearn.linear_model import LinearRegression
 
 pd.set_option("display.width", 500)
 pd.set_option("display.max_columns", 500)
@@ -52,7 +53,6 @@ df.groupby("employee_residence")["salary"].mean().sort_values(ascending=False)
 # Outliers
 
 num_cols = [col for col in df.columns if df[col].dtype in ["int64", "float64"]]
-num_cols = num_cols.remove("work_year")
 
 def outlier_thresholds(dataframe, col_name, q1=0.05, q3=0.95):
     quartile1 = dataframe[col_name].quantile(q1)
@@ -97,6 +97,8 @@ def replace_with_thresholds(dataframe, variable):
     low_limit, up_limit = outlier_thresholds(dataframe, variable)
     dataframe.loc[(dataframe[variable] < low_limit), variable] = low_limit
     dataframe.loc[(dataframe[variable] > up_limit), variable] = up_limit
+
+num_cols.remove("work_year")
 
 for col in num_cols:
     replace_with_thresholds(df, col)
@@ -171,9 +173,12 @@ new_df.dtypes
 num_cols = [col for col in new_df.columns if new_df[col].dtypes != "category"]
 num_cols = [col for col in num_cols if col != "work_year"]
 
-# standartlaştırma
+# standardization
 scaler = StandardScaler()
 new_df[num_cols] = scaler.fit_transform(new_df[num_cols])
+
+robust = RobustScaler()
+new_df[num_cols] = robust.fit_transform(new_df[num_cols])
 
 new_df[num_cols].head()
 
@@ -184,13 +189,32 @@ y = new_df["salary"]  # bağımlı değişken
 X = new_df.drop(["salary", "work_year", "salary_currency", "job_title", "employee_residence", "company_location"], axis=1)  # bağımsız değişkenler, ilgili sütunlar dışındaki değerler
 X.head()
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=42)
 
 rf_model = RandomForestRegressor().fit(X_train, y_train)
-y_pred = rf_model.predict(X_test)  # modeli test seti üzerinde tahmin et,
+rf_y_pred = rf_model.predict(X_test)  # modeli test seti üzerinde tahmin et,
 
-r2 = r2_score(y_test, y_pred)
-print("R^2 Score:", r2)  # 0.8265341422614365
+
+# Lineer Regresyon
+lr_model = LinearRegression()
+lr_model.fit(X_train, y_train)
+
+lr_y_pred = lr_model.predict(X_test)
+
+def get_methods(test, pred, model_name):
+    mae = mean_absolute_error(test, pred)
+    mse = mean_squared_error(test, pred)
+    rmse = np.sqrt(mse)
+    r2 = r2_score(test, pred)
+
+    print(f"{model_name} MAE Score: {mae:.2f}")
+    print(f"{model_name} MSE Score: {mse:.2f}")
+    print(f"{model_name} RMSE Score: {rmse:.2f}")
+    print(f"{model_name} R^2 Score: {r2:.2f}")
+
+
+get_methods(y_test, lr_y_pred, "Linear Regression")
+get_methods(y_test, rf_y_pred, "Random Forest Regression")
 
 
 # Feature Importance
@@ -207,3 +231,4 @@ def plot_importance(model, features, num=len(X), save=False):
         plt.savefig('importances.png')
 
 plot_importance(rf_model, X_train)
+
