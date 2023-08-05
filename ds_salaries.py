@@ -47,6 +47,41 @@ df.groupby(["experience_level"])["salary"].mean().sort_values(ascending=False)
 
 df.groupby("employee_residence")["salary"].mean().sort_values(ascending=False)
 
+# Salary Distribution by Experience Level
+plt.figure(figsize=(10, 6))
+sns.set(font_scale=1)
+sns.barplot(data=df, x="experience_level", y="salary")
+plt.title('Salary Distribution by Experience Level')
+plt.xlabel('Experience Level')
+plt.ylabel('Salary')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+
+# Distribution of Job Titles
+plt.figure(figsize=(14, 6))
+sns.set(font_scale=1)
+sns.countplot(data=df, x="job_title", order=df["job_title"].value_counts().index)
+plt.title('Distribution of Job Titles')
+plt.xlabel('Job Title')
+plt.ylabel('Count')
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+plt.show()
+
+# Salary Distribution of Top 15 Job Titles
+top_n = 15  # top first 15 job title
+
+plt.figure(figsize=(14, 6))
+sns.set(font_scale=1)
+sns.barplot(data=df, x="job_title", y="salary", order=df.groupby("job_title")["salary"].median().sort_values().index[:top_n])
+plt.title(f'Salary Distribution of Top {top_n} Job Titles')
+plt.xlabel('Job Title')
+plt.ylabel('Salary')
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+plt.show()
 
 # Outliers
 
@@ -119,7 +154,7 @@ def convert_cat(dataframe, col1, col2, col3):
 
 
 convert_cat(df, "experience_level", "employment_type", "company_size")
-df
+df.head()
 
 # Creating new features
 
@@ -171,7 +206,7 @@ new_df.dtypes
 num_cols = [col for col in new_df.columns if new_df[col].dtypes != "category"]
 num_cols = [col for col in num_cols if col != "work_year"]
 
-# standardization
+# Standardization
 scaler = StandardScaler()
 new_df[num_cols] = scaler.fit_transform(new_df[num_cols])
 
@@ -230,4 +265,3 @@ def plot_importance(model, features, num=len(X), save=False):
         plt.savefig('importances.png')
 
 plot_importance(rf_model, X_train)
-
