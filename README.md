@@ -15,3 +15,4 @@
 <b> remote_ratio:</b>	The overall amount of work done remotely, possible values are as follows: 0 No remote work (less than 20%) 50 Partially remote 100 Fully remote (more than 80%) <br><br>
 <b> company_location:</b>	The country of the employer's main office or contracting branch as an ISO 3166 country code. <br><br>
 <b> company_size:</b>	The average number of people that worked for the company during the year: S less than 50 employees (small) M 50 to 250 employees (medium) L more than 250 employees (large)
+
